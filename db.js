@@ -109,13 +109,28 @@ const DB = (() => {
   }
   function schedule(S){ if (!uid) return; writeCache(S); clearTimeout(timer); timer = setTimeout(() => push(S), 700); }
 
+  // Último usuario que entró en este dispositivo: permite abrir la app sin conexión aunque
+  // el token de Supabase haya vencido (no se puede renovar sin internet; se renueva solo al volver).
+  const LAST = "libreta-last-user";
+  const remember = u => { try { localStorage.setItem(LAST, JSON.stringify({id:u.id, email:u.email || ""})); } catch(e) {} };
+  const lastUser = () => { try { return JSON.parse(localStorage.getItem(LAST) || "null"); } catch(e) { return null; } };
+
   return {
     sb,
     set onStatus(fn){ onStatus = fn; },
-    async session(){ const {data} = await sb.auth.getSession(); uid = data.session?.user?.id || null; return data.session; },
-    async signIn(email, password){ const {data, error} = await sb.auth.signInWithPassword({email, password}); if (error) throw error; uid = data.user.id; return data; },
-    async signOut(){ await sb.auth.signOut(); uid = null; snap = null; },
-    email: async () => (await sb.auth.getSession()).data.session?.user?.email || "",
+    async session(){
+      const {data, error} = await sb.auth.getSession();
+      let s = data.session;
+      if (s) remember(s.user);
+      else if (!navigator.onLine || error?.name === "AuthRetryableFetchError") {
+        const u = lastUser();
+        if (u && localStorage.getItem("libreta-cache-" + u.id)) s = {user:u, offline:true};
+      }
+      uid = s?.user?.id || null; return s;
+    },
+    async signIn(email, password){ const {data, error} = await sb.auth.signInWithPassword({email, password}); if (error) throw error; uid = data.user.id; remember(data.user); return data; },
+    async signOut(){ await sb.auth.signOut(); uid = null; snap = null; try { localStorage.removeItem(LAST); } catch(e) {} },
+    email: async () => (await sb.auth.getSession()).data.session?.user?.email || lastUser()?.email || "",
     loadAll, readCache,
     useCache(c){ snap = c.snap; return c.S; },
     save: schedule,

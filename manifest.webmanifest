@@ -1,0 +1,20 @@
+{
+  "name": "Libreta de ventas",
+  "short_name": "Libreta",
+  "description": "Pedidos, contactos, productos y catálogos de la libreta de ventas.",
+  "lang": "es-AR",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#1E5B3F",
+  "background_color": "#EEF2EE",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

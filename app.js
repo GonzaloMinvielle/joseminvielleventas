@@ -361,7 +361,7 @@ function editContacto(id){
       <div class="fgrid">
         <label class="f">Club o liga<input data-k="club" value="${esc(d.club)}" autofocus></label>
         <label class="f">Nombre del contacto<input data-k="nombre" value="${esc(d.nombre)}"></label>
-        <label class="f">Teléfono (10 números, sin 0 ni 15)<input data-k="tel" inputmode="tel" value="${esc(d.tel)}" placeholder="2494123456"></label>
+        <label class="f">Teléfono (10 números, sin 0 ni 15)<input data-k="tel" type="tel" inputmode="tel" value="${esc(d.tel)}" placeholder="2494123456"></label>
         <label class="f">Localidad<input data-k="loc" value="${esc(d.loc)}"></label>
         <label class="f">Referido por<input data-k="ref" value="${esc(d.ref)}"></label>
       </div>
@@ -397,7 +397,7 @@ function viewProductos(){
       <button class="btn" id="aumento">Actualizar precios</button>
       <button class="btn primary" id="nuevo">${IC.plus}Producto</button></div>
     <p class="hint" style="margin-top:-.4rem">El costo es lo que te cobra CH1. El precio de venta es el sugerido: al armar un pedido lo podés cambiar para ese cliente.</p>
-    <div class="tablewrap"><table>
+    <div class="tablewrap"><table class="ptable">
       <thead><tr><th>Foto</th><th>Modelo</th><th class="num">Costo</th><th class="num">Precio de venta</th><th class="num">Ganás por unidad</th><th class="num">Margen</th><th class="num">Vendidas</th><th></th></tr></thead>
       <tbody id="tb"></tbody></table></div>`;
   const vend = {};
@@ -405,14 +405,14 @@ function viewProductos(){
   const tb = $("#tb");
   const rowCalc = p => { const g = num(p.precio) - num(p.costo); return {g, m: num(p.costo) ? Math.round(g / num(p.costo) * 100) + "%" : "–"}; };
   tb.innerHTML = S.productos.map(p => { const r = rowCalc(p); return `<tr data-id="${p.id}">
-    <td><label class="thumb" title="Cargar foto">${p.foto ? `<img src="${p.foto}" alt="">` : IC.productos}<input type="file" accept="image/*" class="foto" hidden aria-label="Foto de ${esc(p.nombre)}"></label></td>
-    <td><input data-k="nombre" value="${esc(p.nombre)}" aria-label="Modelo"></td>
-    <td><input class="num" data-k="costo" inputmode="numeric" value="${p.costo||""}" placeholder="Cargar" aria-label="Costo"></td>
-    <td><input class="num" data-k="precio" inputmode="numeric" value="${p.precio||""}" placeholder="Cargar" aria-label="Precio de venta"></td>
-    <td class="num g">${p.costo && p.precio ? money(r.g) : '<span class="nop">Falta precio</span>'}</td>
-    <td class="num m">${p.costo && p.precio ? r.m : ""}</td>
-    <td class="num">${vend[p.nombre] || 0}</td>
-    <td><button class="icon-btn del" aria-label="Eliminar ${esc(p.nombre)}">${IC.x}</button></td></tr>`; }).join("");
+    <td class="c-f"><label class="thumb" title="Cargar foto">${p.foto ? `<img src="${p.foto}" alt="">` : IC.productos}<input type="file" accept="image/*" class="foto" hidden aria-label="Foto de ${esc(p.nombre)}"></label></td>
+    <td class="c-n"><input data-k="nombre" value="${esc(p.nombre)}" aria-label="Modelo"></td>
+    <td class="c-c" data-label="Costo"><input class="num" data-k="costo" inputmode="numeric" value="${p.costo||""}" placeholder="Cargar" aria-label="Costo"></td>
+    <td class="c-p" data-label="Precio de venta"><input class="num" data-k="precio" inputmode="numeric" value="${p.precio||""}" placeholder="Cargar" aria-label="Precio de venta"></td>
+    <td class="num g" data-label="Ganás por unidad">${p.costo && p.precio ? money(r.g) : '<span class="nop">Falta precio</span>'}</td>
+    <td class="num m" data-label="Margen">${p.costo && p.precio ? r.m : ""}</td>
+    <td class="num c-v" data-label="Vendidas">${vend[p.nombre] || 0}</td>
+    <td class="c-x"><button class="icon-btn del" aria-label="Eliminar ${esc(p.nombre)}">${IC.x}</button></td></tr>`; }).join("");
   tb.querySelectorAll("tr").forEach(tr => {
     const p = prod(tr.dataset.id);
     tr.querySelector(".foto").onchange = async e => {
@@ -696,7 +696,7 @@ function viewAjustes(){
     <div class="grid2" style="margin-top:0">
       <div class="card"><h3>Tus datos en el presupuesto</h3><div class="fgrid">
         <label class="f">Nombre o marca<input data-k="nombre" value="${esc(cf.nombre)}" placeholder="Ej: Juan Pérez Deportes"></label>
-        <label class="f">Teléfono<input data-k="tel" value="${esc(cf.tel)}"></label>
+        <label class="f">Teléfono<input data-k="tel" type="tel" inputmode="tel" value="${esc(cf.tel)}"></label>
         <label class="f">Localidad<input data-k="loc" value="${esc(cf.loc)}"></label>
         <label class="f">Días de validez<input data-k="validez" inputmode="numeric" value="${esc(cf.validez)}"></label></div>
         <label class="f" style="margin-top:.8rem">Texto al pie<textarea data-k="pie">${esc(cf.pie)}</textarea></label>
@@ -710,7 +710,9 @@ function viewAjustes(){
         </div></div>
       <div class="card"><h3>Cuenta</h3><p class="hint" style="margin-top:0" id="cuenta">&nbsp;</p>
         <button class="btn" id="salir">Cerrar sesión</button></div>
+      <div class="card install" id="instalar" hidden></div>
     </div>`;
+  drawInstall();
   document.querySelectorAll("[data-k]").forEach(i => i.oninput = () => { cf[i.dataset.k] = i.dataset.k === "validez" ? num(i.value) : i.value; save(); });
   $("#xls").onclick = exportExcel;
   $("#bk").onclick = () => saveFile("libreta-ventas-" + today() + ".json", JSON.stringify(S, null, 1), "application/json");
@@ -736,6 +738,31 @@ function exportExcel(){
       Comisión:num(p.comision), "Comisión para":p.comisionA, Ganancia:k.gan, Cobrado:num(p.cobrado), Saldo:k.saldo, Notas:p.notas}; }), "Pedidos");
   const out = XLSX.write(wb, {bookType:"xlsx", type:"array"});
   saveFile("libreta-ventas-" + today() + ".xlsx", new Blob([out], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
+}
+
+/* ---------- Instalar como app (PWA) ---------- */
+let installPrompt = null;
+const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function drawInstall(){
+  const el = $("#instalar"); if (!el) return;
+  el.hidden = standalone() || (!installPrompt && !isIOS());
+  if (el.hidden) return;
+  el.innerHTML = `<h3>Instalar la app</h3>
+    <p class="hint">Queda como una app más: se abre desde la pantalla de inicio, a pantalla completa y también sin conexión.</p>
+    ${installPrompt ? `<button class="btn primary" id="instalar-btn">Instalar la app</button>` : `<p class="note">En iPhone: Compartir → Agregar a inicio.</p>`}`;
+  $("#instalar-btn") && ($("#instalar-btn").onclick = async () => {
+    const p = installPrompt; installPrompt = null;
+    try { await p.prompt(); await p.userChoice; } catch(e) {}
+    drawInstall();
+  });
+}
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; drawInstall(); });
+window.addEventListener("appinstalled", () => { installPrompt = null; drawInstall(); toast("Listo, la app quedó instalada."); });
+// El service worker guarda la app para abrirla sin conexión. Los archivos propios se piden primero
+// a la red, así que cada deploy se ve al abrir la app con internet: no hace falta recargar a la fuerza.
+if ("serviceWorker" in navigator && window.isSecureContext) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(e => console.warn("Service worker:", e)));
 }
 
 /* ---------- Arranque, login y estado de guardado ---------- */
