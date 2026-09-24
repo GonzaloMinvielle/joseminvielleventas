@@ -1,0 +1,6 @@
+# Datos reales de clientes: nunca al repo
+datos-iniciales.json
+libreta-ventas-*.json
+libreta-ventas-*.xlsx
+node_modules/
+.DS_Store
