@@ -175,6 +175,11 @@ textarea{resize:vertical;min-height:4rem}
   .overlay{padding:0;align-items:stretch}
   .sheet{max-height:none;height:100%;border-radius:0;padding-top:env(safe-area-inset-top,0px)}
   .sheet-h{top:0}
+  /* En el celular los botones van arriba: abajo a la derecha los tapa el badge de Netlify */
+  .sheet{display:flex;flex-direction:column;overflow:hidden}
+  .sheet-h{flex:none}
+  .sheet-f{order:1;flex:none;position:static;border-top:0;border-bottom:1px solid var(--line);padding:.6rem 1rem}
+  .sheet-b{order:2;flex:1;overflow:auto;padding-bottom:calc(5rem + env(safe-area-inset-bottom,0px))}
 }
 .items{display:grid;gap:.5rem}
 .item{display:grid;grid-template-columns:1fr 4.5rem 7.5rem 7rem 2.4rem;gap:.4rem;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.45rem}
@@ -221,17 +226,7 @@ nav.tabs{margin-left:0}
   .chips{padding-bottom:.1rem}
 }
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(12px);opacity:.6}}}
-/* Badge "Powered by Netlify" que inyecta el hosting: tapa la barra inferior */
-html body #nl-badge,html body #nl-card,html body .nl-badge{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
-<script>
-  // Netlify inyecta el badge después de cargar la página: se borra apenas aparece
-  (function(){
-    const quitar = () => document.querySelectorAll("#nl-badge,#nl-card,.nl-badge").forEach(n => n.remove());
-    new MutationObserver(quitar).observe(document.documentElement, {childList: true, subtree: true});
-    document.addEventListener("DOMContentLoaded", quitar);
-  })();
-</script>
 </head>
 <body>
 <header class="top"><div class="top-in">
