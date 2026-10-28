@@ -222,8 +222,16 @@ nav.tabs{margin-left:0}
 }
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(12px);opacity:.6}}}
 /* Badge "Powered by Netlify" que inyecta el hosting: tapa la barra inferior */
-#nl-badge,#nl-card,.nl-badge{display:none!important}
+html body #nl-badge,html body #nl-card,html body .nl-badge{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
+<script>
+  // Netlify inyecta el badge después de cargar la página: se borra apenas aparece
+  (function(){
+    const quitar = () => document.querySelectorAll("#nl-badge,#nl-card,.nl-badge").forEach(n => n.remove());
+    new MutationObserver(quitar).observe(document.documentElement, {childList: true, subtree: true});
+    document.addEventListener("DOMContentLoaded", quitar);
+  })();
+</script>
 </head>
 <body>
 <header class="top"><div class="top-in">
